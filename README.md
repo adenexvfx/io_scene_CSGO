@@ -39,6 +39,7 @@ v 1.0.0
 - Changed the method of creating the visibility data dictionary
 - Added C4 in cleaner tool
 - Only new player models (instead of new and old together) will be converted with the 'filter models' parameter 
+
 v 0.0.2
 - AfxCamera now exports correctly
 - Fixed animations rotations of v_ knives
