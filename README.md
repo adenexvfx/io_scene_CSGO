@@ -35,6 +35,12 @@ This part of the addon can be useful when it comes to exporting all models from 
 ![AGR tools](https://i.imgur.com/SAsVlQU.png)
 
 # Changelog
+v 1.2.2
+- Added user presets
+- Fixed some major bugs
+- Sorter function for Batch qc converter now have it's own switch
+- Json file with the visibility data now stores correct amount of keyframes
+
 v 1.1.0
 - Added the sorter function
 - Pirates are fixed now
