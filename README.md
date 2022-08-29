@@ -35,6 +35,11 @@ This part of the addon can be useful when it comes to exporting all models from 
 ![AGR tools](https://i.imgur.com/SAsVlQU.png)
 
 # Changelog
+v 1.2.6
+- Fixed rotate for skeleton knife
+- 'Wristband' sleeve will be skipped now, because it breaks skeleton in UE
+- Minor fixes
+
 v 1.2.2
 - Added user presets
 - Fixed some major bugs

@@ -24,7 +24,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
     )
     change_scale: bpy.props.FloatProperty(
         name='Scale',
-        description='Scales models and animations',
+        description='Scales models and animations (0.01 = default, 0.023 = UE scale)',
         min=0.000001, max=100000.0,
         soft_min=0.00001, soft_max=1.0,
         default=0.01,
@@ -98,7 +98,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
     verbose: bpy.props.BoolProperty(
         name='Verbose',
         description='Verbose mode',
-        default=True,
+        default=False,
     )
     fix_bones: bpy.props.BoolProperty(
         name='Fix bones',
@@ -162,12 +162,13 @@ class QC_SMD_Convert(Operator, ExportHelper):
                 if self.convert_models:
                     if filename.endswith('.qc') and not filename.endswith('_anim.qc') and not filename.endswith('_animations.qc') and 'bullet' not in dirpath:
                         if self.filter_models:
-                            if ((filename.startswith('ctm_') or filename.startswith('tm_')) and 'custom_player' in dirpath) or filename.startswith('v_') or filename.startswith('w_') or ('arms' in filename and 'w_models' not in dirpath):
+                            if ((filename.startswith('ctm_') or filename.startswith('tm_')) and 'custom_player' in dirpath) or filename.startswith('v_') \
+                                    or filename.startswith('w_') or 'arms' in filename:
                                 if (
                                         '_icon' not in filename and not filename.endswith('_inspect.qc')
                                         and not filename.endswith('_mag.qc') and 'knife_gg' not in dirpath
                                         and 'knife_ghost' not in dirpath and '_scopelensmask' not in filename
-                                        and filename != 'v_knife.qc'
+                                        and filename != 'v_knife.qc' and 'wristband' not in dirpath and 'w_glove' not in filename
                                 ):
                                     qc()
 
@@ -267,10 +268,11 @@ class QC_SMD_Convert(Operator, ExportHelper):
                 bpy.data.objects.remove(i)
 
         for i in bpy.data.objects:
-            if (qc_type == 'player' and self.rotate_model
-                    and 'legacy' in valve_file_full_path
-                    and i.name.endswith('skeleton')):
-                i.rotation_euler = (1.5708, 0, 0)
+            if i.type == 'ARMATURE':
+                if (qc_type == 'player' and self.rotate_model
+                        and 'legacy' in valve_file_full_path
+                        and i.name.endswith('_skeleton')):
+                    i.rotation_euler = (1.5708, 0, 0)
 
         if qc_type == 'arms':
             self.qc_export(valve_file_full_path, prefix, 'agr_' + valve_filename, cleaning=False, is_static=True)
@@ -311,8 +313,8 @@ class QC_SMD_Convert(Operator, ExportHelper):
                                     materials.material.name = 'bare_arm_135'
                                 elif 'base_arms_' in materials.name:
                                     materials.material.name = 'v_model_base_arms'
-                if 'pirate' in valve_filename:
-                    # fix for pirates
+                if 'pirate' in valve_filename and 'custom_player' in valve_filename:
+                    # fix for pirates (only new models)
                     FixCSGO.pirates()
 
             elif qc_type == 'w_weapon':
@@ -322,7 +324,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
                 else:
                     if self.rotate_model:
                         for i in bpy.data.objects:
-                            if i.name.endswith('skeleton'):
+                            if i.type == 'ARMATURE' and i.name.endswith('_skeleton'):
                                 i.rotation_euler = (1.5708, 0, 0)
 
             elif qc_type == 'v_weapon':
@@ -349,7 +351,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
     def qc_export(self, full_path, prefix, filename, cleaning=True, is_static=False):
 
         for i in bpy.data.objects:
-            if i.name.endswith('skeleton'):
+            if i.type == 'ARMATURE' and i.name.endswith('_skeleton'):
                 i.name = self.skeleton_name
 
         if prefix.startswith('w_') or prefix.startswith('v_') and self.remove_useless:

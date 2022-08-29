@@ -2,7 +2,7 @@ bl_info = {
     "name": "io_scene_CSGO",
     "category": "Import-Export",
     "author": "adenex",
-    "version": (1, 2, 5),
+    "version": (1, 2, 6),
     "blender": (2, 90, 0),
     "description": "This tool can convert CS:GO's .QC files to .FBX, clean and export your scene",
     "location": "File > Import, Side Panel"
@@ -227,10 +227,10 @@ class Export_FBX_Vis(Operator, ExportHelper):
     bl_label = "Export the scene"
 
     # ExportHelper mixin class uses this
-    filename_ext = ".json"
+    filename_ext = ""
 
     filter_glob: StringProperty(
-        default="*.json",
+        default="",
         options={'HIDDEN'},
         maxlen=255,  # Max internal buffer length, longer would be clamped.
     )
@@ -275,6 +275,7 @@ class Export_FBX_Vis(Operator, ExportHelper):
             self.agr_to_fbx()
         if self.export_visibility:
             self.visibility_export()
+        print(f'\nFINISHED')
         return {'FINISHED'}
 
     def agr_to_fbx(self):
@@ -295,7 +296,13 @@ class Export_FBX_Vis(Operator, ExportHelper):
 
         print(f'Export starting...\nstart frame: {scn.frame_start}, end frame: {scn.frame_end}')
 
-        for mesh in bpy.data.objects:
+        mesh_id = 0
+        data_objects = bpy.data.objects
+        for mesh in data_objects:
+
+            mesh_id += 1
+            percentage = 100 * mesh_id / len(data_objects)
+            print('{:.2f} %'.format(percentage))
 
             fbx_filepath = self.filepath + '\\' + mesh.name + '.fbx'
             if mesh.name.startswith('afx.') and mesh.type == 'ARMATURE':
@@ -305,9 +312,9 @@ class Export_FBX_Vis(Operator, ExportHelper):
                     bpy.context.view_layer.objects.active = mesh
                     if self.fixbones:
                         FixCSGO.bones(True, True)
-                    if 'pirate' in mesh.data.name:
-                        # fix for pirates
-                        FixCSGO.pirates()
+                        if 'pirate' in mesh.data.name:
+                            # fix for pirates
+                            FixCSGO.pirates()
                     if '_skeleton' in mesh.data.name:
                         mesh.name = self.skeleton_name
 
