@@ -175,19 +175,24 @@ def zero_frame(bone_name):
 def pirates():
     def fix(bone_to_fix):
         bpy.ops.object.mode_set(mode='OBJECT')
-        bpy.data.armatures[0].bones[bone_to_fix].select = 1
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.armature.parent_clear()
-        print(f'{bone_to_fix} unparented')
-        bpy.data.armatures[0].edit_bones.active = bpy.data.armatures[0].edit_bones[bone_to_fix]
         try:
-            bpy.data.armatures[0].edit_bones.active = bpy.data.armatures[0].edit_bones['spine_2']
-            bpy.ops.armature.parent_set(type='OFFSET')
-            print(f'{bone_to_fix} parented to spine_2')
+            bpy.data.armatures[0].bones[bone_to_fix].select = 1
         except KeyError:  # old pirate model
             pass
-        bpy.ops.object.mode_set(mode='EDIT')
-        bpy.ops.armature.select_all(action='DESELECT')
+        else:
+            bpy.ops.object.mode_set(mode='EDIT')
+            bpy.ops.armature.parent_clear()
+            print(f'{bone_to_fix} unparented')
+            bpy.data.armatures[0].edit_bones.active = bpy.data.armatures[0].edit_bones[bone_to_fix]
+            try:
+                bpy.data.armatures[0].edit_bones.active = bpy.data.armatures[0].edit_bones['spine_2']
+                bpy.ops.armature.parent_set(type='OFFSET')
+                print(f'{bone_to_fix} parented to spine_2')
+            except KeyError:  # old pirate model
+                pass
+            else:
+                bpy.ops.object.mode_set(mode='EDIT')
+                bpy.ops.armature.select_all(action='DESELECT')
 
     fix('JiggleBone_F_tassle_1')
     fix('JiggleBone_B_tassle_5')

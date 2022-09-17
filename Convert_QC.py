@@ -313,7 +313,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
                                     materials.material.name = 'bare_arm_135'
                                 elif 'base_arms_' in materials.name:
                                     materials.material.name = 'v_model_base_arms'
-                if 'pirate' in valve_filename and 'custom_player' in valve_filename:
+                if 'pirate' in valve_filename:
                     # fix for pirates (only new models)
                     FixCSGO.pirates()
 

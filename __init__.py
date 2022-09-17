@@ -2,7 +2,7 @@ bl_info = {
     "name": "io_scene_CSGO",
     "category": "Import-Export",
     "author": "adenex",
-    "version": (1, 2, 6),
+    "version": (1, 2, 7),
     "blender": (2, 90, 0),
     "description": "This tool can convert CS:GO's .QC files to .FBX, clean and export your scene",
     "location": "File > Import, Side Panel"
