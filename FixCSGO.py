@@ -60,7 +60,7 @@ def bones(animation_file, verbose):
                 if animation_file:
                     scn.frame_set(scn.frame_start)
 
-                    for frame in range(0, 1):
+                    for frame in range(1):
                         scn.frame_set(frame)
                         # create dict with matrix in it
                         matrix_dict = {scn.frame_current: get_source_matrix(skeleton.pose.bones[bone_to_fix])}

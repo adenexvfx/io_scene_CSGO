@@ -1,8 +1,10 @@
+import contextlib
+
 bl_info = {
     "name": "io_scene_CSGO",
     "category": "Import-Export",
     "author": "adenex",
-    "version": (1, 2, 7),
+    "version": (1, 2, 71),
     "blender": (2, 90, 0),
     "description": "This tool can convert CS:GO's .QC files to .FBX, clean and export your scene",
     "location": "File > Import, Side Panel"
@@ -59,7 +61,7 @@ PROPS = [
 
 def all_objects():
     if bpy.context.active_object:
-        if bpy.context.active_object.mode == 'POSE' or bpy.context.active_object.mode == 'EDIT':
+        if bpy.context.active_object.mode in ['POSE', 'EDIT']:
             bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='SELECT')
     selected_anims = bpy.context.selected_objects
@@ -86,10 +88,8 @@ def fixer():  # fix bad naming
     diselect()
     for obj in bpy.context.scene.objects:
         if re.match(r'afx.\w+.\w+.+', obj.name):
-            try:
+            with contextlib.suppress(Exception):
                 obj.name = re.sub(r'(afx.\w+.\w+)(.+)', r'\1.mdl', obj.name)
-            except Exception:
-                pass
 
 
 def remover(f_name, mesh_pattern_list, dropped=False):
@@ -97,14 +97,12 @@ def remover(f_name, mesh_pattern_list, dropped=False):
     print(f'\nRemoving: {f_name}')
 
     def remover_helper():
-        try:
+        with contextlib.suppress(Exception):
             mesh.select_set(True)
             for child_mesh in mesh.children:
                 child_mesh.select_set(True)
             print(f'Removed mesh: {mesh.name}')
             bpy.ops.object.delete()
-        except Exception:
-            pass
 
     for pattern in mesh_pattern_list:
         for mesh in bpy.data.objects:
@@ -182,14 +180,12 @@ def duplicates():
             del_list = sel_anims[1:]
             print(f'Detected {len(del_list)} duplicates')
             for mesh in del_list:
-                try:
+                with contextlib.suppress(Exception):
                     mesh.select_set(True)
                     for child_mesh in mesh.children:
                         child_mesh.select_set(True)
                     print(f'Removed duplicate: {mesh.name}')
                     bpy.ops.object.delete()
-                except Exception:
-                    pass
         bpy.ops.object.select_all(action='DESELECT')
 
     duplicate_finder('v_glove')
@@ -210,9 +206,7 @@ def anims_zero():
     bpy.ops.object.select_pattern(pattern='*.mdl*', case_sensitive=False, extend=True)
     bpy.context.scene.frame_current = 1
     selected_anims = bpy.context.selected_objects
-    sel_anims = []
-    for i in selected_anims:
-        sel_anims.append(i.name)
+    sel_anims = [i.name for i in selected_anims]
     for a in sel_anims:
         bpy.ops.anim.keyframe_insert_menu(type='Location')
         bpy.data.objects[a].location = (0, 0, 0)
@@ -298,15 +292,15 @@ class Export_FBX_Vis(Operator, ExportHelper):
 
         mesh_id = 0
         data_objects = bpy.data.objects
+        total_armatures = len(
+            [arm for arm in data_objects
+             if (arm.name.startswith('afx.') and arm.type == 'ARMATURE')
+             or arm.name.startswith('camera') or arm.name == 'afxCam'])
+
         for mesh in data_objects:
-
-            mesh_id += 1
-            percentage = 100 * mesh_id / len(data_objects)
-            print('{:.2f} %'.format(percentage))
-
-            fbx_filepath = self.filepath + '\\' + mesh.name + '.fbx'
+            fbx_filepath = f'{self.filepath}\\{mesh.name}.fbx'
             if mesh.name.startswith('afx.') and mesh.type == 'ARMATURE':
-                try:
+                with contextlib.suppress(Exception):
                     mesh.select_set(True)
                     old_root_name = mesh.name
                     bpy.context.view_layer.objects.active = mesh
@@ -317,27 +311,29 @@ class Export_FBX_Vis(Operator, ExportHelper):
                             FixCSGO.pirates()
                     if '_skeleton' in mesh.data.name:
                         mesh.name = self.skeleton_name
-
+                    mesh_id += 1
+                    self.print_percentage(mesh_id, total_armatures)
                     export_fbx('ARMATURE', self.change_scale)
-
                     mesh.name = old_root_name
                     mesh.select_set(False)
-                except Exception:
-                    pass
 
             if mesh.name.startswith('camera') or mesh.name == 'afxCam':
                 bpy.context.view_layer.objects.active = mesh
-                try:
+                with contextlib.suppress(Exception):
                     mesh.select_set(True)
                     bpy.data.objects[mesh.name].scale = (0.01, 0.01, 0.01)
                     scn.frame_current = scn.frame_start
                     bpy.ops.anim.keyframe_insert_menu(type='Scaling')
+                    mesh_id += 1
+                    self.print_percentage(mesh_id, total_armatures)
                     export_fbx('CAMERA', self.change_scale)
                     bpy.data.objects[mesh.name].scale = (1, 1, 1)
                     bpy.ops.anim.keyframe_insert_menu(type='Scaling')
                     mesh.select_set(False)
-                except Exception:
-                    pass
+
+    def print_percentage(self, mesh_id, total_armatures):
+        percentage = 100 * mesh_id / total_armatures
+        print('\n{:.2f} %'.format(percentage))
 
     def visibility_export(self):
         time_start = time.time()
@@ -398,9 +394,8 @@ class Export_FBX_Vis(Operator, ExportHelper):
         second_pass()
         print('Done.')
 
-        export_file = open(self.filepath + '\\' + 'visibility.json', 'w')
-        json.dump(vis_dict, export_file, sort_keys=False, indent=2)
-        export_file.close()
+        with open(self.filepath + '\\' + 'visibility.json', 'w') as export_file:
+            json.dump(vis_dict, export_file, sort_keys=False, indent=2)
         print('\nJSON file was exported in {:.2f} seconds'.format(time.time() - time_start))
 
     def draw(self, context):
@@ -752,28 +747,28 @@ class SaveUserPreset(Operator):
     def execute(self, context):
         addon_folder = os.path.dirname(os.path.realpath(__file__))
         context.area.tag_redraw()
-        user_settings = {}
-        user_settings['remove_w_knives'] = context.scene.remove_w_knives
-        user_settings['remove_dropped_knives'] = context.scene.remove_dropped_knives
-        user_settings['remove_w_guns'] = context.scene.remove_w_guns
-        user_settings['remove_dropped_guns'] = context.scene.remove_dropped_guns
-        user_settings['remove_w_pistols'] = context.scene.remove_w_pistols
-        user_settings['remove_dropped_pistols'] = context.scene.remove_dropped_pistols
-        user_settings['remove_w_nades'] = context.scene.remove_w_nades
-        user_settings['remove_dropped_nades'] = context.scene.remove_dropped_nades
-        user_settings['remove_w_c4'] = context.scene.remove_w_c4
-        user_settings['remove_dropped_c4'] = context.scene.remove_dropped_c4
-        user_settings['remove_pov'] = context.scene.remove_pov
-        user_settings['remove_misc'] = context.scene.remove_misc
-        user_settings['remove_duplicates'] = context.scene.remove_duplicates
-        user_settings['place_animations'] = context.scene.place_animations
+        user_settings = {
+            'remove_w_knives': context.scene.remove_w_knives,
+            'remove_dropped_knives': context.scene.remove_dropped_knives,
+            'remove_w_guns': context.scene.remove_w_guns,
+            'remove_dropped_guns': context.scene.remove_dropped_guns,
+            'remove_w_pistols': context.scene.remove_w_pistols,
+            'remove_dropped_pistols': context.scene.remove_dropped_pistols,
+            'remove_w_nades': context.scene.remove_w_nades,
+            'remove_dropped_nades': context.scene.remove_dropped_nades,
+            'remove_w_c4': context.scene.remove_w_c4,
+            'remove_dropped_c4': context.scene.remove_dropped_c4,
+            'remove_pov': context.scene.remove_pov,
+            'remove_misc': context.scene.remove_misc,
+            'remove_duplicates': context.scene.remove_duplicates,
+            'place_animations': context.scene.place_animations
+        }
 
         settings_folder = os.path.join(addon_folder, 'Settings')
         if not os.path.exists(settings_folder):
             os.makedirs(settings_folder)
-        export_file = open(settings_folder + '\\' + 'UserSettings.json', 'w')
-        json.dump(user_settings, export_file, sort_keys=False, indent=2)
-        export_file.close()
+        with open(settings_folder + '\\' + 'UserSettings.json', 'w') as export_file:
+            json.dump(user_settings, export_file, sort_keys=False, indent=2)
         print(f'\nUser settings saved in {settings_folder}')
 
         return {'FINISHED'}
@@ -787,29 +782,31 @@ class LoadUserPreset(Operator):
         addon_folder = os.path.dirname(os.path.realpath(__file__))
         settings_folder = os.path.join(addon_folder, 'Settings')
         if os.path.exists(settings_folder + '\\' + 'UserSettings.json'):
-            json_file = open(settings_folder + '\\' + 'UserSettings.json')
-            user_data = json.load(json_file)
-            # load data
-            context.scene.remove_w_knives = user_data['remove_w_knives']
-            context.scene.remove_dropped_knives = user_data['remove_dropped_knives']
-            context.scene.remove_w_guns = user_data['remove_w_guns']
-            context.scene.remove_dropped_guns = user_data['remove_dropped_guns']
-            context.scene.remove_w_pistols = user_data['remove_w_pistols']
-            context.scene.remove_dropped_pistols = user_data['remove_dropped_pistols']
-            context.scene.remove_w_nades = user_data['remove_w_nades']
-            context.scene.remove_dropped_nades = user_data['remove_dropped_nades']
-            context.scene.remove_w_c4 = user_data['remove_w_c4']
-            context.scene.remove_dropped_c4 = user_data['remove_dropped_c4']
-            context.scene.remove_pov = user_data['remove_pov']
-            context.scene.remove_misc = user_data['remove_misc']
-            context.scene.remove_duplicates = user_data['remove_duplicates']
-            context.scene.place_animations = user_data['place_animations']
-
-            json_file.close()
+            with open(settings_folder + '\\' + 'UserSettings.json') as json_file:
+                self.load_user_data(json_file, context)
         else:
             print('User settings not found')
 
         return {'FINISHED'}
+
+    def load_user_data(self, json_file, context):
+        user_data = json.load(json_file)
+        # load data
+        context.scene.remove_w_knives = user_data['remove_w_knives']
+        context.scene.remove_dropped_knives = user_data['remove_dropped_knives']
+        context.scene.remove_w_guns = user_data['remove_w_guns']
+        context.scene.remove_dropped_guns = user_data['remove_dropped_guns']
+        context.scene.remove_w_pistols = user_data['remove_w_pistols']
+        context.scene.remove_dropped_pistols = user_data['remove_dropped_pistols']
+        context.scene.remove_w_nades = user_data['remove_w_nades']
+        context.scene.remove_dropped_nades = user_data['remove_dropped_nades']
+        context.scene.remove_w_c4 = user_data['remove_w_c4']
+        context.scene.remove_dropped_c4 = user_data['remove_dropped_c4']
+        context.scene.remove_pov = user_data['remove_pov']
+        context.scene.remove_misc = user_data['remove_misc']
+        context.scene.remove_duplicates = user_data['remove_duplicates']
+        context.scene.place_animations = user_data['place_animations']
+
 
 cLasses = [
     Export_FBX_Vis,

@@ -37,7 +37,7 @@ def model_sorter(export_model_path, fbx_name):
         sorted_subtype_path = 'animations\\players\\' + animation_folder
 
     def vw(model_type):
-        if model_type == 'V' or model_type == 'W':
+        if model_type in {'V', 'W'}:
             p = 'weapons'
         elif model_type == 'V_ANIMS':
             p = 'animations\\weapons\V'
@@ -66,7 +66,7 @@ def model_sorter(export_model_path, fbx_name):
 
         return s_path
 
-    if model_type == 'V' or model_type == 'W' or model_type == 'V_ANIMS' or model_type == 'W_ANIMS':
+    if model_type in {'V', 'W', 'V_ANIMS', 'W_ANIMS'}:
         sorted_path = vw(model_type)
         model_folder = export_model_path.split('\\')[-1]
         if model_folder == '' or 'ied' in fbx_name or 'c4' in fbx_name:
