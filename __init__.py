@@ -204,6 +204,7 @@ def anims_zero():
     print('\n\nCleaning done, now working with keyframes...')
     diselect()
     bpy.ops.object.select_pattern(pattern='*.mdl*', case_sensitive=False, extend=True)
+    bpy_frame = bpy.context.scene.frame_current
     bpy.context.scene.frame_current = 1
     selected_anims = bpy.context.selected_objects
     sel_anims = [i.name for i in selected_anims]
@@ -213,6 +214,7 @@ def anims_zero():
         z_offset(a, bpy.context.scene.offset)
         bpy.ops.anim.keyframe_insert_menu(type='Location')
     bpy.ops.object.select_all(action='DESELECT')
+    bpy.context.scene.frame_current = bpy_frame  # restore current time
     print('\nYour scene is ready for export')
 
 
@@ -307,9 +309,11 @@ class Export_FBX_Vis(Operator, ExportHelper):
                     if self.fixbones:
                         FixCSGO.bones(True, True)
                         if 'pirate' in mesh.data.name:
-                            # fix for pirates
                             FixCSGO.pirates()
-                    if '_skeleton' in mesh.data.name:
+                    if (
+                            mesh.data.name.endswith('_skeleton')
+                            or mesh.data.name.startswith('models/')
+                    ):
                         mesh.name = self.skeleton_name
                     mesh_id += 1
                     self.print_percentage(mesh_id, total_armatures)

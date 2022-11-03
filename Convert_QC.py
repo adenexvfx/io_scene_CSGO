@@ -138,21 +138,18 @@ class QC_SMD_Convert(Operator, ExportHelper):
             # replace _anim in prefix name
             if smd_prefix.endswith('_anim'):
                 smd_prefix = smd_prefix.replace('_anim', '')
-            if self.convert_v_animations:
-                if smd_prefix.startswith('v_'):
-                    if self.verbose:
-                        print(f'SMD file {filename} will be imported: {smd_file}')
-                    self.qc_import(smd_file, filename, False, smd_prefix)
-            if self.convert_w_animations:
-                if smd_prefix.startswith('w_'):
-                    if self.verbose:
-                        print(f'SMD file {filename} will be imported: {smd_file}')
-                    self.qc_import(smd_file, filename, False, smd_prefix)
-            if self.convert_player_animations:
-                if 'player' in dirpath:
-                    if self.verbose:
-                        print(f'SMD file {filename} will be imported: {smd_file}')
-                    self.qc_import(smd_file, filename, False, '')
+            if self.convert_v_animations and smd_prefix.startswith('v_'):
+                if self.verbose:
+                    print(f'SMD file {filename} will be imported: {smd_file}')
+                self.qc_import(smd_file, filename, False, smd_prefix)
+            if self.convert_w_animations and smd_prefix.startswith('w_'):
+                if self.verbose:
+                    print(f'SMD file {filename} will be imported: {smd_file}')
+                self.qc_import(smd_file, filename, False, smd_prefix)
+            if self.convert_player_animations and 'player' in dirpath:
+                if self.verbose:
+                    print(f'SMD file {filename} will be imported: {smd_file}')
+                self.qc_import(smd_file, filename, False, '')
 
         for dirpath, dirs, files in os.walk(self.filepath):
             for filename in files:
@@ -219,7 +216,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
             smdfolder = smdfile_list_path[-2]  # anims folder
             qc_folder = smdfile_list_path[-3]  # folder with qc file
             qc_path = '\\'.join(smdfile_list_path[:-3])  # D:\Distrib\3d stuff\csgo_models\QC_SOURCE\models\weapons
-            qcfile = os.path.join(qc_path, qc_folder) + '\\' + qc_folder.replace('_anims', '') + '.qc'
+            qcfile = f"{os.path.join(qc_path, qc_folder)}\\{qc_folder.replace('_anims', '')}.qc"
 
             line_to_find = smdfolder + '\\' + valve_filename
 
@@ -378,7 +375,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
                 fbx_name = fbx_name.replace('glock_', '')
             elif fbx_name.startswith('mac10_'):  # fix animation's name for mac10
                 fbx_name = fbx_name.replace('mac10_', '')
-            fbx_name = prefix + '_' + fbx_name
+            fbx_name = f'{prefix}_{fbx_name}'
 
         # Export as fbx
         def export(name, clean=True):

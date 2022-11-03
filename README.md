@@ -1,12 +1,13 @@
 # io_scene_CSGO
-Bones fixing addon for Blender.
+Bones fixing addon for Blender for later usage in Unreal Engine.
 
 Basically these are two addons merged together. 
 - The first you can find in ```File > Import > Batch convert CSGO's QC files```. 
 - The second is ```at the side panel```.
 
-# Download
+# Download and install
 You can download it [here](https://github.com/adenexvfx/io_scene_CSGO/releases). I also released the [tutorial](https://youtu.be/9r7T2mFlLV4) about this addon and my UE widget.
+[Blender Source Tools](http://steamreview.org/BlenderSourceTools/) addon is required for io_scene_CSGO
 
 # Batch QC converter
 This part of the addon can batch convert QC and SMD files in the folder. It fixes all the bones of the model
@@ -35,6 +36,10 @@ This part of the addon can be useful when it comes to exporting all models from 
 ![AGR tools](https://i.imgur.com/SAsVlQU.png)
 
 # Changelog
+v 1.2.8
+- Now weird skeleton names must be renamed too during export
+- Some refactoring
+
 v 1.2.7
 - Fixed pirates (again)
 
