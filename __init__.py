@@ -4,7 +4,7 @@ bl_info = {
     "name": "io_scene_CSGO",
     "category": "Import-Export",
     "author": "adenex",
-    "version": (1, 2, 71),
+    "version": (1, 2, 81),
     "blender": (2, 90, 0),
     "description": "This tool can convert CS:GO's .QC files to .FBX, clean and export your scene",
     "location": "File > Import, Side Panel"
@@ -310,11 +310,7 @@ class Export_FBX_Vis(Operator, ExportHelper):
                         FixCSGO.bones(True, True)
                         if 'pirate' in mesh.data.name:
                             FixCSGO.pirates()
-                    if (
-                            mesh.data.name.endswith('_skeleton')
-                            or mesh.data.name.startswith('models/')
-                    ):
-                        mesh.name = self.skeleton_name
+                    mesh.name = self.skeleton_name
                     mesh_id += 1
                     self.print_percentage(mesh_id, total_armatures)
                     export_fbx('ARMATURE', self.change_scale)
