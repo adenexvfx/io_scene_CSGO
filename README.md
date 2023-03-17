@@ -1,4 +1,4 @@
-# io_scene_CSGO
+# io_scene_CSGO_MasterWeapons
 Bones fixing addon for Blender for later usage in Unreal Engine.
 
 Basically these are two addons merged together. 
