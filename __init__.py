@@ -1,7 +1,7 @@
 import contextlib
 
 bl_info = {
-    "name": "io_scene_CSGO",
+    "name": "io_scene_CSGO_MasterWeapons",
     "category": "Import-Export",
     "author": "adenex",
     "version": (1, 2, 81),
@@ -29,6 +29,7 @@ from bpy_extras.io_utils import (
 )
 from . import Convert_QC
 from . import FixCSGO
+from . import ExportCSGO_UE
 
 
 def menu_draw_convert(self, context):
@@ -54,15 +55,14 @@ PROPS = [
     ('remove_pov', bpy.props.BoolProperty(name='Remove POV', default=False, description='Completely removes POV (viewmodels)')),
     ('remove_duplicates', bpy.props.BoolProperty(name='Remove duplicates', default=True, description='Removes all duplicated gloves and sleeves')),
     ('remove_misc', bpy.props.BoolProperty(name='Remove useless models', default=True, description='Removes stickers, defuser kits and stattrack models')),
-    ('place_animations', bpy.props.BoolProperty(name='Place all animations at (0,0,0)', default=True, description='Prevents animations from appearing in other sequences. This option will take some time to process')),
+    ('place_animations', bpy.props.BoolProperty(name='Place all animations at (0,0,0)', default=False, description='Prevents animations from appearing in other sequences. This option will take some time to process')),
     ('offset', bpy.props.IntProperty(name='Z Offset', default=-5)),
 ]
 
 
 def all_objects():
-    if bpy.context.active_object:
-        if bpy.context.active_object.mode in ['POSE', 'EDIT']:
-            bpy.ops.object.mode_set(mode='OBJECT')
+    if bpy.context.active_object and bpy.context.active_object.mode in ['POSE', 'EDIT']:
+        bpy.ops.object.mode_set(mode='OBJECT')
     bpy.ops.object.select_all(action='SELECT')
     selected_anims = bpy.context.selected_objects
     armatures_list = []
@@ -243,11 +243,6 @@ class Export_FBX_Vis(Operator, ExportHelper):
         soft_min=0.01, soft_max=100.0,
         default=1.0,
     )
-    fixbones: BoolProperty(
-        name='Fix bones',
-        description='Use this only when you converted models with QC converter',
-        default=True,
-    )
     export_FBX: BoolProperty(
         name='Export FBX',
         description='Export all animations as fbx',
@@ -306,10 +301,9 @@ class Export_FBX_Vis(Operator, ExportHelper):
                     mesh.select_set(True)
                     old_root_name = mesh.name
                     bpy.context.view_layer.objects.active = mesh
-                    if self.fixbones:
-                        FixCSGO.bones(True, True)
-                        if 'pirate' in mesh.data.name:
-                            FixCSGO.pirates()
+                    FixCSGO.bones(True, True)
+                    if 'pirate' in mesh.data.name:
+                        FixCSGO.pirates()
                     mesh.name = self.skeleton_name
                     mesh_id += 1
                     self.print_percentage(mesh_id, total_armatures)
@@ -431,7 +425,6 @@ class MENU_PT_export_fbx_settings(Panel):
         layout.enabled = operator.export_FBX
         layout.prop(operator, 'skeleton_name')
         layout.prop(operator, "change_scale")
-        layout.prop(operator, "fixbones")
 
 
 class MENU_PT_export_visibility_settings(Panel):
@@ -567,7 +560,7 @@ class PresetSelectAll(Operator):
         context.scene.remove_pov = True
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -615,7 +608,7 @@ class PresetPistolPreset(Operator):
         context.scene.remove_pov = False
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -639,7 +632,7 @@ class PresetRifflePreset(Operator):
         context.scene.remove_pov = False
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -663,7 +656,7 @@ class PresetRemoveAllWPreset(Operator):
         context.scene.remove_pov = False
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -687,7 +680,7 @@ class PresetRemoveAllDropped(Operator):
         context.scene.remove_pov = False
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -711,7 +704,7 @@ class PresetPlayersAndPov(Operator):
         context.scene.remove_pov = False
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -735,7 +728,7 @@ class PresetPlayersOnly(Operator):
         context.scene.remove_pov = True
         context.scene.remove_misc = True
         context.scene.remove_duplicates = True
-        context.scene.place_animations = True
+        context.scene.place_animations = False
         context.area.tag_redraw()
         return {'FINISHED'}
 
@@ -827,7 +820,16 @@ cLasses = [
     Convert_QC.QC_SMD_Convert,
     Convert_QC.QC_SMD_MENU_PT_convert_general_setings,
     Convert_QC.QC_SMD_MENU_PT_convert_model_setings,
-    Convert_QC.QC_SMD_MENU_PT_convert_animation_setings
+    Convert_QC.QC_SMD_MENU_PT_convert_animation_setings,
+    ExportCSGO_UE.Import_Export_PT_QC_SMD_panel,
+    ExportCSGO_UE.Import_QC_SMD_,
+    ExportCSGO_UE.Export_FBX_UE,
+    ExportCSGO_UE.CCSGO_OT_pick_object,
+    ExportCSGO_UE.Make_Camera,
+    ExportCSGO_UE.MENU_PT_export_fbx_qc_settings,
+    ExportCSGO_UE.Import_Export_PT_Constrains_panel,
+    ExportCSGO_UE.Constrains_Builder
+
 ]
 
 
@@ -836,6 +838,7 @@ def register():
         setattr(bpy.types.Scene, prop_name, prop_value)
     for cls in cLasses:
         bpy.utils.register_class(cls)
+    ExportCSGO_UE.register()
     bpy.types.TOPBAR_MT_file_import.append(menu_draw_convert)
 
 
@@ -844,6 +847,7 @@ def unregister():
         delattr(bpy.types.Scene, prop_name)
     for cls in cLasses:
         bpy.utils.unregister_class(cls)
+    ExportCSGO_UE.unregister()
     bpy.types.TOPBAR_MT_file_import.remove(menu_draw_convert)
 
 

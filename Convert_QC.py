@@ -27,7 +27,7 @@ class QC_SMD_Convert(Operator, ExportHelper):
         description='Scales models and animations (0.01 = default, 0.023 = UE scale)',
         min=0.000001, max=100000.0,
         soft_min=0.00001, soft_max=1.0,
-        default=0.01,
+        default=0.023,
     )
     set_fps: bpy.props.BoolProperty(
         name='Set fps from QC file',
@@ -99,11 +99,6 @@ class QC_SMD_Convert(Operator, ExportHelper):
         name='Verbose',
         description='Verbose mode',
         default=False,
-    )
-    fix_bones: bpy.props.BoolProperty(
-        name='Fix bones',
-        description='',
-        default=True,
     )
 
     def invoke(self, context, event):
@@ -273,13 +268,11 @@ class QC_SMD_Convert(Operator, ExportHelper):
 
         if qc_type == 'arms':
             self.qc_export(valve_file_full_path, prefix, 'agr_' + valve_filename, cleaning=False, is_static=True)
-            if self.fix_bones:
-                FixCSGO.bones(animation_file=False, verbose=self.verbose)
+            FixCSGO.v_model(valve_file_full_path, is_animation=False, mtype=qc_type, objects_to_ignore=[], armatures_to_ignore=[], converter=True)
             self.qc_export(valve_file_full_path, prefix, valve_filename, is_static=True)
 
         elif qc_type == 'merged_arms':
-            if self.fix_bones:
-                FixCSGO.bones(animation_file=False, verbose=self.verbose)
+            FixCSGO.v_model(valve_file_full_path, is_animation=False, mtype=qc_type, objects_to_ignore=[], armatures_to_ignore=[], converter=True)
             self.qc_export(valve_file_full_path, prefix, valve_filename, is_static=True)
 
         else:
@@ -327,16 +320,13 @@ class QC_SMD_Convert(Operator, ExportHelper):
             elif qc_type == 'v_weapon':
                 if self.remove_useless:
                     self.remove_useless_parts()
-                if self.fix_bones:
-                    FixCSGO.bones(animation_file=False, verbose=self.verbose)
+                FixCSGO.v_model(valve_file_full_path, is_animation=False, objects_to_ignore=[], armatures_to_ignore=[], converter=True)
 
             elif qc_type == 'misc':
-                if self.fix_bones:
-                    FixCSGO.bones(animation_file=False, verbose=self.verbose)
+                FixCSGO.v_model(valve_file_full_path, is_animation=False, objects_to_ignore=[], armatures_to_ignore=[], converter=True)
 
             if not is_qc_file:
-                if self.fix_bones:
-                    FixCSGO.bones(animation_file=True, verbose=self.verbose)
+                FixCSGO.v_model(valve_file_full_path, is_animation=True, objects_to_ignore=[], armatures_to_ignore=[], converter=True)
                 if scn.frame_start == scn.frame_end and self.fix_zero_length_anims:
                     if 'v_' in valve_file_full_path:
                         FixCSGO.zero_frame('v_weapon.Bip01_L_Forearm')
@@ -363,17 +353,17 @@ class QC_SMD_Convert(Operator, ExportHelper):
         fbx_name = filename.rsplit('.')[0]
 
         if not is_static and 'player' not in full_path:
-            if fbx_name.startswith('a_'):  # fix animation's name for revolver
+            if fbx_name.startswith('a_'):  # fix animations name for revolver
                 fbx_name = fbx_name.replace('a_', '')
-            elif fbx_name.startswith('ak47_'):  # fix animation's name for ak47
+            elif fbx_name.startswith('ak47_'):  # fix animations name for ak47
                 fbx_name = fbx_name.replace('ak47_', '')
-            elif fbx_name.startswith('awp_'):  # fix animation's name for awp
+            elif fbx_name.startswith('awp_'):  # fix animations name for awp
                 fbx_name = fbx_name.replace('awp_', '')
-            elif fbx_name.startswith('bizon_'):  # fix animation's name for bizon
+            elif fbx_name.startswith('bizon_'):  # fix animations name for bizon
                 fbx_name = fbx_name.replace('bizon_', '')
-            elif fbx_name.startswith('glock_'):  # fix animation's name for glock
+            elif fbx_name.startswith('glock_'):  # fix animations name for glock
                 fbx_name = fbx_name.replace('glock_', '')
-            elif fbx_name.startswith('mac10_'):  # fix animation's name for mac10
+            elif fbx_name.startswith('mac10_'):  # fix animations name for mac10
                 fbx_name = fbx_name.replace('mac10_', '')
             fbx_name = f'{prefix}_{fbx_name}'
 
@@ -440,7 +430,6 @@ class QC_SMD_MENU_PT_convert_general_setings(Panel):
         layout.prop(operator, "change_scale")
         layout.prop(operator, "export_path")
         layout.prop(operator, 'filter_models')
-        layout.prop(operator, "fix_bones")
         layout.prop(operator, "sort_models")
         layout.prop(operator, "verbose")
 
