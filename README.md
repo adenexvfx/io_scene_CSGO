@@ -1,11 +1,11 @@
 # io_scene_CSGO MasterWeapons branch
 Bones fixing addon for Blender for later usage in Unreal Engine.
 
+[PREVIEW](https://youtu.be/q6eHmEuyc-8)
+
 Basically these are two addons merged together. 
 - The first you can find in ```File > Import > Batch convert CSGO's QC files```. 
 - The second is ```at the side panel```.
-
-![ph](https://i.imgur.com/lPmVlHv.gif)
 
 # Download and install
 You can download it [here](https://github.com/adenexvfx/io_scene_CSGO/releases/tag/v1.0).
