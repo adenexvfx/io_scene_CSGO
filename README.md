@@ -20,6 +20,8 @@ This part of the addon can batch convert QC and SMD files in the folder. It fixe
 - Can fix idle animations for weapons and players (with only one keyframe inside it). Basically it will add two more keyframes, so Unreal Engine will import it correctly.
 - Set fps of the animation automatically, from reading the QC file. If this option is disabled, or QC file is missing, fps will be set to 30.
 
+![Settings](https://i.imgur.com/jq8lgFM.png)
+
 # Batch SFM2 DMX converter
 This part of the addon can batch convert DMX animations from SFM2.
 
@@ -28,8 +30,6 @@ This part of the addon can batch convert DMX animations from SFM2.
 - Fps for animation will be set automatically.
 - Keyframes for animations and camera will offset automatically.
 - Agr-like naming of FBX files.
-
-![Settings](https://i.imgur.com/jq8lgFM.png)
 
 ## Thanks to
 [Darkhandrob](https://github.com/Darkhandrob) for the main idea (this project started as a branch of AIOX), [Zamb](https://www.youtube.com/channel/UCYx-EP6nZloVJc5gRrSce1g) for some major bugreports, [kitmvm](https://www.youtube.com/c/kitmvm) for providing information about fps values in QC files, [lasa01](https://github.com/lasa01) who pushed me in the right direction so I could fix random Blender crashes.
