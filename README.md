@@ -1,13 +1,14 @@
 # io_scene_CSGO
 Bones fixing addon for Blender for later usage in Unreal Engine.
 
-Basically these are two addons merged together. 
+Basically these are three addons merged together. 
 - The first you can find in ```File > Import > Batch convert CSGO's QC files```. 
 - The second is ```at the side panel```.
+- The third you can find in ```File > Import > Batch Convert SFM2 DMX to FBX```. 
 
 # Download and install
 You can download it [here](https://github.com/adenexvfx/io_scene_CSGO/releases). I also released the [tutorial](https://youtu.be/9r7T2mFlLV4) about this addon and my UE widget.
-[Blender Source Tools](http://steamreview.org/BlenderSourceTools/) addon is required for io_scene_CSGO
+[Blender Source Tools](http://steamreview.org/BlenderSourceTools/) and [SourceIO](https://github.com/REDxEYE/SourceIO/releases) addons are required for io_scene_CSGO
 
 # Batch QC converter
 This part of the addon can batch convert QC and SMD files in the folder. It fixes all the bones of the model
@@ -18,6 +19,15 @@ This part of the addon can batch convert QC and SMD files in the folder. It fixe
 - You can rotate players models (will affect only new players models in the 'legacy' folder) and W weapons by 90 degrees.
 - Can fix idle animations for weapons and players (with only one keyframe inside it). Basically it will add two more keyframes, so Unreal Engine will import it correctly.
 - Set fps of the animation automatically, from reading the QC file. If this option is disabled, or QC file is missing, fps will be set to 30.
+
+# Batch SFM2 DMX converter
+This part of the addon can batch convert DMX animations from SFM2.
+
+## Features
+- Will fix all the bones of the skeleton for later usage in Unreal Engine.
+- Fps for animation will be set automatically.
+- Keyframes for animations and camera will offset automatically.
+- Agr-like naming of FBX files.
 
 ![Settings](https://i.imgur.com/jq8lgFM.png)
 
