@@ -8,7 +8,7 @@ Basically these are three addons merged together.
 
 # Download and install
 You can download it [here](https://github.com/adenexvfx/io_scene_CSGO/releases). I also released the [tutorial](https://youtu.be/9r7T2mFlLV4) about this addon and my UE widget.
-[Blender Source Tools v. 3.2.6]([http://steamreview.org/BlenderSourceTools/](http://steamreview.org/BlenderSourceTools/archives/)) and [SourceIO](https://github.com/REDxEYE/SourceIO/releases) addons are required for io_scene_CSGO
+[Blender Source Tools v. 3.2.6]([http://steamreview.org/BlenderSourceTools/](http://steamreview.org/BlenderSourceTools/archives/) and [SourceIO](https://github.com/REDxEYE/SourceIO/releases) addons are required for io_scene_CSGO
 
 # Batch QC converter
 This part of the addon can batch convert QC and SMD files in the folder. It fixes all the bones of the model
